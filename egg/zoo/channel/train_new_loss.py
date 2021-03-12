@@ -68,7 +68,7 @@ def NAD(message):
     message is a batch of messages of shape (batch_size, message_length)
     return a tensor of shape (batch_size)
     """
-    for i range(1, message.shape[1]):
+    for i in range(1, message.shape[1]):
         letter1, letter2 = message[:,i-1].long(), message[:,i].long()
         nad = abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
             torch.logical_and(letter1 < 26, letter2 < 26)*abs(Cs[letter1][:,1] - Cs[letter2][:,1])
