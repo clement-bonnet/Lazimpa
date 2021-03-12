@@ -61,7 +61,7 @@ Cs_list = [
     (0,0), #C39
     (0,0), #C40
 ]
-Cs = torch.Tensor(Cs_list).
+Cs = torch.Tensor(Cs_list)
 
 def NAD(message):
     """
