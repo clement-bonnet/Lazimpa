@@ -145,7 +145,14 @@ def loss_impatient(sender_input, _message, message_length, _receiver_input, rece
 
     acc = acc.sum(1)
     loss= loss.sum(1)
-    print("New loss")
+
+    ######## Change the loss here ###########
+    #
+    # 
+    print('_message:', _message)
+    #
+    #
+    #########################################
 
     return loss, {'acc': acc}, crible_acc
 
