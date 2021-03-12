@@ -61,14 +61,14 @@ Cs_list = [
     (0,0), #C39
     (0,0), #C40
 ]
-Cs = torch.Tensor(Cs_list)
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+Cs = torch.Tensor(Cs_list).to(device)
 
 def NAD(message):
     """
     message is a batch of messages of shape (batch_size, message_length)
     return a tensor of shape (batch_size)
     """
-    Cs = Cs.to(message.device)
     for i in range(1, message.shape[1]):
         letter1, letter2 = message[:,i-1].long(), message[:,i].long()
         nad = abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
