@@ -211,11 +211,7 @@ def loss_impatient( sender_input, _message, message_length, _receiver_input,
 
     ######## Change the loss here ###########
     #
-    # 
-    print("loss before:", loss)
     loss = loss - lambda_nad * NAD(_message)
-    print("loss after", loss)
-    #
     #
     #########################################
 
