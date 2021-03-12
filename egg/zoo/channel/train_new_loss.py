@@ -17,6 +17,18 @@ from egg.core.reinforce_wrappers import SenderImpatientReceiverRnnReinforce
 from egg.core.util import dump_sender_receiver_impatient
 
 
+### NAD
+
+def NAD(message):
+    """
+    message is a batch of messages of shape (batch_size, message_lenght)
+    """
+    return message.sum(axis=1)
+
+###
+
+
+
 def get_params(params):
     parser = argparse.ArgumentParser()
     parser.add_argument('--n_features', type=int, default=10,
@@ -149,7 +161,9 @@ def loss_impatient(sender_input, _message, message_length, _receiver_input, rece
     ######## Change the loss here ###########
     #
     # 
-    print('_message:', _message)
+    print("loss before:", loss)
+    loss += NAD(_message).sum()
+    print("loss after", loss)
     #
     #
     #########################################
