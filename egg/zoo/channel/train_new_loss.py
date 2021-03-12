@@ -162,7 +162,7 @@ def loss_impatient(sender_input, _message, message_length, _receiver_input, rece
     #
     # 
     print("loss before:", loss)
-    loss += NAD(_message).sum()
+    loss += NAD(_message)
     print("loss after", loss)
     #
     #
