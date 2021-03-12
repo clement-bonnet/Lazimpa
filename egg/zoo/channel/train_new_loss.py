@@ -149,12 +149,24 @@ def get_params(params):
     return args
 
 
-def loss(sender_input, _message, _receiver_input, receiver_output, _labels):
+def loss(sender_input, _message, _receiver_input, receiver_output, _labels, lambda_nad=1):
     acc = (receiver_output.argmax(dim=1) == sender_input.argmax(dim=1)).detach().float()
     loss = F.cross_entropy(receiver_output, sender_input.argmax(dim=1), reduction="none")
+
+    ######## Change the loss here ###########
+    #
+    # 
+    print("loss before:", loss)
+    loss = loss - lambda_nad * NAD(_message)
+    print("loss after", loss)
+    #
+    #
+    #########################################
+
     return loss, {'acc': acc}
 
-def loss_impatient(sender_input, _message, message_length, _receiver_input, receiver_output, _labels):
+def loss_impatient( sender_input, _message, message_length, _receiver_input,
+                    receiver_output, _labels):
 
     """
     Compute the loss function for the Impatient Listener.
@@ -206,16 +218,6 @@ def loss_impatient(sender_input, _message, message_length, _receiver_input, rece
 
     acc = acc.sum(1)
     loss= loss.sum(1)
-
-    ######## Change the loss here ###########
-    #
-    # 
-    print("loss before:", loss)
-    loss = loss - lambda_nad * NAD(_message)
-    print("loss after", loss)
-    #
-    #
-    #########################################
 
     return loss, {'acc': acc}, crible_acc
 
