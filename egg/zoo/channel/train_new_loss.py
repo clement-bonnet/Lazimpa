@@ -17,15 +17,64 @@ from egg.core.reinforce_wrappers import SenderImpatientReceiverRnnReinforce
 from egg.core.util import dump_sender_receiver_impatient
 
 
-### NAD
+############ NAD ######################
+
+Cs_list = [
+    (5,1), #C1
+    (5,1), #C2
+    (5,2), #C3
+    (5,2), #C4          
+    (5,3.5) #C5
+    (5,3.5), #C6
+    (5,5), #C7
+    (4.5,2.5), #C8
+    (4.5,2.5), #C9
+    (4,1.3), #C10
+    (4,1.3), #C11
+    (4,1.6), #C12
+    (4,1.6), #C13
+    (4,2), #C14
+    (4,2), #C15
+    (4,2.5), #C16
+    (4,2.5), #C17
+    (4,5), #C18
+    (3,1), #C19
+    (3,2), #C20
+    (3,3.5), #C21
+    (2.5,2), #C22
+    (2,2.5), #C23
+    (1,1), #C24
+    (1,3), #C25
+    (1,3.5), #C26
+    (0,0), #C27
+    (0,0), #C28
+    (0,0), #C29
+    (0,0), #C30
+    (0,0), #C31
+    (0,0), #C32
+    (0,0), #C33
+    (0,0), #C34
+    (0,0), #C35
+    (0,0), #C36
+    (0,0), #C37
+    (0,0), #C38
+    (0,0), #C39
+    (0,0), #C40
+]
+Cs = torch.Tensor(Cs_list)
 
 def NAD(message):
     """
-    message is a batch of messages of shape (batch_size, message_lenght)
+    message is a batch of messages of shape (batch_size, message_length)
+    return a tensor of shape (batch_size)
     """
-    return message.sum(axis=1)
+    for i range(1, message.shape[1]):
+        letter1, letter2 = message[:,i-1].long(), message[:,i].long()
+        nad = abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
+            torch.logical_and(letter1 < 26, letter2 < 26)*abs(Cs[letter1][:,1] - Cs[letter2][:,1])
+    return nad
 
-###
+#########################################
 
 
 
@@ -162,7 +211,7 @@ def loss_impatient(sender_input, _message, message_length, _receiver_input, rece
     #
     # 
     print("loss before:", loss)
-    loss += NAD(_message)
+    loss = loss - lambda_nad * NAD(_message)
     print("loss after", loss)
     #
     #
