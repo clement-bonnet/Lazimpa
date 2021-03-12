@@ -149,13 +149,13 @@ def get_params(params):
     return args
 
 
-def loss(sender_input, _message, _receiver_input, receiver_output, _labels, lambda_nad=1):
+def loss(sender_input, _message, _receiver_input, receiver_output, _labels):
     acc = (receiver_output.argmax(dim=1) == sender_input.argmax(dim=1)).detach().float()
     loss = F.cross_entropy(receiver_output, sender_input.argmax(dim=1), reduction="none")
     return loss, {'acc': acc}
 
 def loss_impatient( sender_input, _message, message_length, _receiver_input,
-                    receiver_output, _labels):
+                    receiver_output, _labels, lambda_nad=1):
 
     """
     Compute the loss function for the Impatient Listener.
