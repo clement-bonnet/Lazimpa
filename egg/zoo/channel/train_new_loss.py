@@ -3,8 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-import json
 import argparse
+from functools import partial
+import json
+
 import numpy as np
 import torch.utils.data
 import torch.nn.functional as F
@@ -144,19 +146,26 @@ def get_params(params):
                         help='Print message ?')
     parser.add_argument('--reg', type=bool, default=False,
                         help='Add regularization ?')
+    parser.add_argument('--lambda_nad', type=float, default=0,
+                        help='NAD regularization')
 
     args = core.init(parser, params)
 
     return args
 
 
-def loss(sender_input, _message, _receiver_input, receiver_output, _labels):
+def loss(sender_input, _message, _receiver_input, receiver_output, _labels, lambda_nad):
     acc = (receiver_output.argmax(dim=1) == sender_input.argmax(dim=1)).detach().float()
     loss = F.cross_entropy(receiver_output, sender_input.argmax(dim=1), reduction="none")
+    ######## Change the loss here ###########
+    #
+    loss = loss - lambda_nad * NAD(_message)
+    #
+    #########################################
     return loss, {'acc': acc}
 
 def loss_impatient( sender_input, _message, message_length, _receiver_input,
-                    receiver_output, _labels, lambda_nad=1):
+                    receiver_output, _labels, lambda_nad):
 
     """
     Compute the loss function for the Impatient Listener.
@@ -415,11 +424,13 @@ def main(params):
         #                                         num_layers=opts.receiver_num_layers, max_len=opts.max_len, n_features=opts.n_features)
 
     if not opts.impatient:
-        game = core.SenderReceiverRnnReinforce(sender, receiver, loss, sender_entropy_coeff=opts.sender_entropy_coeff,
+        loss_fn = partial(loss, lambda_nad=opts.lambda_nad)
+        game = core.SenderReceiverRnnReinforce(sender, receiver, loss_fn, sender_entropy_coeff=opts.sender_entropy_coeff,
                                            receiver_entropy_coeff=opts.receiver_entropy_coeff,
                                            length_cost=opts.length_cost,unigram_penalty=opts.unigram_pen,reg=opts.reg)
     else:
-        game = SenderImpatientReceiverRnnReinforce(sender, receiver, loss_impatient, sender_entropy_coeff=opts.sender_entropy_coeff,
+        loss_fn = partial(loss_impatient, lambda_nad=opts.lambda_nad)
+        game = SenderImpatientReceiverRnnReinforce(sender, receiver, loss_fn, sender_entropy_coeff=opts.sender_entropy_coeff,
                                            receiver_entropy_coeff=opts.receiver_entropy_coeff,
                                            length_cost=opts.length_cost,unigram_penalty=opts.unigram_pen,reg=opts.reg)
 
