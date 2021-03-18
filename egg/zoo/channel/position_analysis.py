@@ -2,7 +2,7 @@
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-
+import os
 import json
 import argparse
 import numpy as np
@@ -254,8 +254,8 @@ def main(params):
           for j in range(id_0[0]+1,opts.max_len):
               position_sieve[i,j]=-1
 
-
-    np.save("analysis/position_sieve.npy",position_sieve)
+    path_position_sieve = os.path.join(opts.save_dir, "position_sieve.npy")
+    np.save(path_position_sieve, position_sieve)
 
     core.close()
 
