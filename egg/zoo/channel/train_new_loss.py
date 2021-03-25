@@ -66,15 +66,21 @@ Cs_list = [
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 Cs = torch.Tensor(Cs_list).to(device)
 
-def NAD(message):
+def NAD(message, message_length):
     """
     message is a batch of messages of shape (batch_size, message_length)
     return a tensor of shape (batch_size)
     """
+    eps = 1e-3
+    message_length = message_length.to(device)
+    nad = torch.zeros(message.shape[0], device=device)
     for i in range(1, message.shape[1]):
         letter1, letter2 = message[:,i-1].long(), message[:,i].long()
-        nad = abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
+        nad += (message_length > i) * (
+            abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
             torch.logical_and(letter1 < 26, letter2 < 26)*abs(Cs[letter1][:,1] - Cs[letter2][:,1])
+            )
+    nad = 1/(message_length-1+eps) * nad
     return nad
 
 #########################################
@@ -154,12 +160,12 @@ def get_params(params):
     return args
 
 
-def loss(sender_input, _message, _receiver_input, receiver_output, _labels, lambda_nad):
+def loss(sender_input, _message, _receiver_input, receiver_output, _labels, lambda_nad, message_length=None):
     acc = (receiver_output.argmax(dim=1) == sender_input.argmax(dim=1)).detach().float()
     loss = F.cross_entropy(receiver_output, sender_input.argmax(dim=1), reduction="none")
     ######## Change the loss here ###########
     #
-    loss = loss - lambda_nad * NAD(_message)
+    loss = loss - lambda_nad * NAD(_message, message_length)
     #
     #########################################
     return loss, {'acc': acc}
@@ -220,7 +226,7 @@ def loss_impatient( sender_input, _message, message_length, _receiver_input,
 
     ######## Change the loss here ###########
     #
-    loss = loss - lambda_nad * NAD(_message)
+    loss = loss - lambda_nad * NAD(_message, message_length)
     #
     #########################################
 
