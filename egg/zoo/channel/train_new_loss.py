@@ -73,8 +73,8 @@ def NAD(message, message_length):
     """
     nad = 0
     M = message.shape[1]
-    print(message.shape)
-    print(message[0], message[1])
+    print(message_length.shape)
+    print(message_length)
     for i in range(1, M):
         letter1, letter2 = message[:,i-1].long(), message[:,i].long()
         nad += abs(Cs[letter1][:,0] - Cs[letter2][:,0]) + \
