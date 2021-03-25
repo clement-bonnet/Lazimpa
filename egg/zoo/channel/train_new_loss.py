@@ -73,7 +73,7 @@ def NAD(message, message_length):
     """
     eps = 1e-3
     message_length = message_length.to(device)
-    nad = torch.zeros(message.shape[0])
+    nad = torch.zeros(message.shape[0], device=device)
     for i in range(1, message.shape[1]):
         letter1, letter2 = message[:,i-1].long(), message[:,i].long()
         nad += (message_length > i) * (
